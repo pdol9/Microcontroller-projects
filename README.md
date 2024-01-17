@@ -22,3 +22,8 @@ Task of this assignment is to make/improvise a light tracking device by using tw
 
 ![Prototype](./day02/ard3.jpg "Prototype")
 
+## Fourth assignment - day3
+
+First part: Create and host a webpage on ESP8266 which enables to turn on / off LEDs with provided browser's interface.
+
+Second part: write few color sequences to run on LED matrix using browser's interface.
