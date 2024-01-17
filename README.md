@@ -20,5 +20,5 @@ Second part (bonus) makes possible to enter current value via console instead of
 
 Task of this assignment is to make/improvise a light tracking device by using two servos and three photoresistors.
 
-![alt text](./day2/ard3.jpg "Prototype")
+![Prototype](./day2/ard3.jpg "Prototype")
 
