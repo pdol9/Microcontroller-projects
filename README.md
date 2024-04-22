@@ -31,7 +31,7 @@ source of light and turn towards it.
 
 Prototype
 <br>
-<img src="./light-tracking-device/prototype.png" alt="Prototype" width="400" height="600">
+<img src="./light-tracking-device/prototype.jpg" alt="Prototype" width="400" height="600">
 
 ### Fourth project: remote control of ESP8266 via webserver
 
