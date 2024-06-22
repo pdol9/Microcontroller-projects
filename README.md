@@ -14,7 +14,7 @@ Second part does similar, but this time red and yellow LEDs blink interchangeabl
 
 Third part includes red LED additional blinking.
 
-### LCD screen
+### LCD screen - voltage regulator
 
 First part of the project consists of a LCD screen and potentiometer. With the
 help of the latter, LCD should display voltage value which is being regulated
@@ -23,15 +23,11 @@ via potentiometer.
 Second part makes possible to enter voltage value via serial connection (console)
 instead of using potentiometer.
 
-### Light-sensitive tracking device
+### Light-tracking device
 
-Goal of this project is to make a light tracking device. Device will detect the
-light source and turn towards it. It uses two servos and three photoresistors so
-it can rotate and follow all directions.
-
-Prototype
-<br>
-<img src="./light-tracking-device/prototype.jpg" alt="Prototype" width="300" height="500">
+Goal of this project is to make a light-tracking device. Device will detect the
+(brightest) light source and rotate towards it. It uses two servos and three
+photoresistors so it can rotate and scan in all directions.
 
 ### Remote control of LED-matrix via webserver/ESP8266 
 
