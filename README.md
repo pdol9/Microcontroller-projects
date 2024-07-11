@@ -4,6 +4,8 @@
 
 Below is a group of several projects based on Arduino board and ESP8266.
 
+There are two directories, containing C/C++ and Rust codebase respectively.
+
 ### Blinking LEDs
 
 Build a circuit with a red, yellow and green LEDs. Red and yellow should blink
