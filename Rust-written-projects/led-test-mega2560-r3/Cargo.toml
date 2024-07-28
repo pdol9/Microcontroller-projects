@@ -1,7 +1,7 @@
 [package]
 name = "led-test-mega2560-r3"
 version = "0.1.0"
-authors = ["pdol <79060962+gm015@users.noreply.github.com>"]
+authors = ["pdol <111592903+pdol9@users.noreply.github.com>"]
 edition = "2021"
 license = ""
 
