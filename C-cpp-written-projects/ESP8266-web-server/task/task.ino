@@ -1,23 +1,14 @@
 #include <ESP8266WiFi.h>
 
 // network credentials
-const char *ssid = "Tp-Link_03";
-const char *password = "**********";
+const char *ssid = "replace";
+const char *password = "replace";
 
 // web server port
 WiFiServer server(80);
 
 // store the HTTP request
 String header;
-
-// Set your Static IP address
-// IPAddress local_IP(192, 168, 1, 193);
-// // Set your Gateway IP address
-// IPAddress gateway(192, 168, 1, 1);
-
-// IPAddress subnet(255, 255, 0, 0);
-// IPAddress primaryDNS(8, 8, 8, 8);   //optional
-// IPAddress secondaryDNS(8, 8, 4, 4); //optional
 
 // store the current output state
 String RED_LEDState = "off";
@@ -40,12 +31,7 @@ void setup() {
   digitalWrite(RED_LED, LOW);
   digitalWrite(GREEN_LED, LOW);
 
-  // Configures static IP address   -> before hand, adjust settings on a router
-  // if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
-  //   Serial.println("STA Failed to configure");
-  // }
-
-  // Connect to Wi-Fi network with SSID and password
+  // Connect to Wi-Fi network and run server
   Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
@@ -53,7 +39,6 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  // Print local IP address and start web server
   Serial.println("");
   Serial.println("WiFi connected.");
   Serial.println("IP address: ");
@@ -62,35 +47,28 @@ void setup() {
 }
 
 void loop() {
-  WiFiClient client = server.accept();   // Listen for incoming clients
+  WiFiClient client = server.accept();        // Listen for incoming clients
 
-  if (client) {                             // If a new client connects,
+  if (client) {
+    Serial.println("New Client.");
+    String currentLine = "";
     currentTime = millis();
     previousTime = currentTime;
-    Serial.println("New Client.");          // print a message out in the serial port
-    String currentLine = "";                // make a String to hold incoming data from the client
-    
-    // while the client's connected
+
     while (client.connected() && currentTime - previousTime <= timeoutTime) {
       currentTime = millis();
       if (client.available()) {             // if there's bytes to read from the client,
-        char c = client.read();             // read a byte, then
-        Serial.write(c);                    // print it out the serial monitor
+        char c = client.read();
+        Serial.write(c);
         header += c;
        
-        if (c == '\n') {                    // if the byte is a newline character
-          // if the current line is blank, you got two newline characters in a row.
-          // that's the end of the client HTTP request, so send a response:
-         
+        if (c == '\n') {
           if (currentLine.length() == 0) {
-            // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-            // and a content-type so the client knows what's coming, then a blank line:
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/html");
             client.println("Connection: close");
             client.println();
             
-            // turns the GPIOs on and off
             if (header.indexOf("GET /D0/on") >= 0) {
               Serial.println("GPIO D0 (red LED) on");
               RED_LEDState = "on";
@@ -110,43 +88,39 @@ void loop() {
             }
             
             // Display the HTML web page
-            client.println("<!DOCTYPE html><html>");
-            client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-            client.println("<link rel=\"icon\" href=\"data:,\">");
-            // CSS to style the on/off buttons 
-            // Feel free to change the background-color and font-size attributes to fit your preferences
+            client.println("<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><link rel=\"icon\" href=\"data:,\">");
             client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
-            client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");
-            client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
-            client.println(".button2 {background-color: #555555;}</style></head>");
-            
-            // Web Page Heading
-            client.println("<body><h1>ESP32 Web Server</h1>");
-            
-            // Display current state, and ON/OFF buttons for GPIO D0
-            client.println("<p>GPIO D0 - State " + RED_LEDState + "</p>");
-            // If the RED_LEDState is off, it displays the ON button       
+           
+            client.println(".container { display: flex; justify-content: center; gap: 20px; } .column { flex: 1; max-width: 200px; }");
+            client.println(".button, .button2 { width: 200px; background-color: #4CAF50; border: none; color: white; padding: 16px; text-decoration: none; font-size: 30px; margin: 5px 2px; display: inline-block; }");
+            client.println(".button2 { background-color: gray; }");
+            client.println(".button3 { background-color: #c4d4e3; border: 2px solid black; padding: 16px 40px; text-decoration: none; font-size: 30px; color: black; margin: 5px 2px; cursor: pointer; transform: scale(0.5); transform-origin: center; }");
+            client.println(".red-border { width: 100px; color: red; border: 3px solid red; padding: 5px; display: inline-block; }");
+            client.println(".green-border { width: 100px; color: green; border: 3px solid green; padding: 5px; display: inline-block; } </style> </head> <body>");
+            client.println("<h1>ESP8622 Web Server</h1>");
+          
+            client.println("<div class=\"container\"> <div class=\"column\"><p class=\"red-border\">gpio D0</p>");
             if (RED_LEDState=="off") {
-              client.println("<p><a href=\"/D0/on\"><button class=\"button\">ON</button></a></p>");
+              client.println("<p><button class=""button2"">Status: OFF</button></p>" \
+              "<p><a href=\"/D0/on\"><button class=\"button3\">ON</button></a></p></div>");
             } else {
-              client.println("<p><a href=\"/D0/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("<p><button class=""button"">Status: ON</button></p>" \
+              "<p><a href=\"/D0/off\"><button class=\"button3\">OFF</button></a></p></div>");
             } 
                
-            // Display current state, and ON/OFF buttons for GPIO D1 
-            client.println("<p>GPIO D1 - State " + GREEN_LEDState + "</p>");
-            // If the GREEN_LEDState is off, it displays the ON button       
+            client.println("<div class=\"column\"> <p class=\"green-border\">gpio D1</p>");
             if (GREEN_LEDState=="off") {
-              client.println("<p><a href=\"/D1/on\"><button class=\"button\">ON</button></a></p>");
+              client.println("<p><button class=""button2"">Status: OFF</button></p>" \
+              "<p><a href=\"/D1/on\"><button class=\"button3\">ON</button></a></p></div>");
             } else {
-              client.println("<p><a href=\"/D1/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("<p><button class=""button"">Status: ON</button></p>" \
+              "<p><a href=\"/D1/off\"><button class=\"button3\">OFF</button></a></p></div>");
             }
-            client.println("</body></html>");
+            client.println("</div></body></html>");
             
-            // The HTTP response ends with another blank line
-            client.println();
-            // Break out of the while loop
+            client.println();       // The HTTP response ends with another blank line
             break;
-          } else { // if you got a newline, then clear currentLine
+          } else {                  // if you got a newline, then clear currentLine
             currentLine = "";
           }
         } else if (c != '\r') {  // if you got anything else but a carriage return character,
@@ -154,12 +128,9 @@ void loop() {
         }
       }
     }
-    // Clear the header variable
     header = "";
-    // Close the connection
     client.stop();
     Serial.println("Client disconnected.");
     Serial.println("");
   }
 }
-
