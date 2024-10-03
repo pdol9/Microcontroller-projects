@@ -1,136 +1,96 @@
-#include <ESP8266WiFi.h>
+#include "LittleFS.h"
+#include <ESPAsyncWebServer.h>
 
-// network credentials
-const char *ssid = "replace";
-const char *password = "replace";
+const char *ssid = "*****";
+const char *password = "*****";
 
-// web server port
-WiFiServer server(80);
-
-// store the HTTP request
-String header;
+AsyncWebServer server(80);
 
 // store the current output state
-String RED_LEDState = "off";
-String GREEN_LEDState = "off";
+String redLEDState = "off";
+String greenLEDState = "off";
 
 // Assign output variables to GPIO pins
 const int RED_LED = D0;
 const int GREEN_LED = D1;
 
-unsigned long currentTime = millis();
-unsigned long previousTime = 0; 
-const long timeoutTime = 2000;
+String processor(const String& var) {
+
+	if (var == "redLEDState") {
+		return redLEDState;
+	} else if (var == "greenLEDState") {
+		return greenLEDState;
+	}
+	return String();
+}
 
 void setup() {
 
-  Serial.begin(115200);
-  pinMode(RED_LED, OUTPUT);
-  pinMode(GREEN_LED, OUTPUT);
+	pinMode(RED_LED, OUTPUT);
+	pinMode(GREEN_LED, OUTPUT);
+	digitalWrite(RED_LED, LOW);
+	digitalWrite(GREEN_LED, LOW);  
 
-  digitalWrite(RED_LED, LOW);
-  digitalWrite(GREEN_LED, LOW);
+	Serial.begin(115200);
+	if (!LittleFS.begin()) {
+		Serial.println("Failed to mount file system");
+		return;
+	}
 
-  // Connect to Wi-Fi network and run server
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected.");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-  server.begin();
-}
+	// start up WiFi
+	WiFi.begin(ssid, password);
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(1000);
+		Serial.println("Connecting ...");
+	}
+	Serial.print("Connected to ");
+	Serial.print(ssid);
+	Serial.print(". IP address: ");
+	Serial.println(WiFi.localIP());
 
-void loop() {
-  WiFiClient client = server.accept();        // Listen for incoming clients
+	// Route the main HTML page
+	server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/index.html", String(), false, processor);
+    });
+	server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/style.css", "text/css");
+    });
 
-  if (client) {
-    Serial.println("New Client.");
-    String currentLine = "";
-    currentTime = millis();
-    previousTime = currentTime;
-
-    while (client.connected() && currentTime - previousTime <= timeoutTime) {
-      currentTime = millis();
-      if (client.available()) {             // if there's bytes to read from the client,
-        char c = client.read();
-        Serial.write(c);
-        header += c;
-       
-        if (c == '\n') {
-          if (currentLine.length() == 0) {
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println("Connection: close");
-            client.println();
-            
-            if (header.indexOf("GET /D0/on") >= 0) {
-              Serial.println("GPIO D0 (red LED) on");
-              RED_LEDState = "on";
-              digitalWrite(RED_LED, HIGH);
-            } else if (header.indexOf("GET /D0/off") >= 0) {
-              Serial.println("GPIO D0 (red LED) off");
-              RED_LEDState = "off";
-              digitalWrite(RED_LED, LOW);
-            } else if (header.indexOf("GET /D1/on") >= 0) {
-              Serial.println("GPIO D1 (green LED) on");
-              GREEN_LEDState = "on";
-              digitalWrite(GREEN_LED, HIGH);
-            } else if (header.indexOf("GET /D1/off") >= 0) {
-              Serial.println("GPIO D1 (green LED) off");
-              GREEN_LEDState = "off";
-              digitalWrite(GREEN_LED, LOW);
-            }
-            
-            // Display the HTML web page
-            client.println("<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><link rel=\"icon\" href=\"data:,\">");
-            client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
-           
-            client.println(".container { display: flex; justify-content: center; gap: 20px; } .column { flex: 1; max-width: 200px; }");
-            client.println(".button, .button2 { width: 200px; background-color: #4CAF50; border: none; color: white; padding: 16px; text-decoration: none; font-size: 30px; margin: 5px 2px; display: inline-block; }");
-            client.println(".button2 { background-color: gray; }");
-            client.println(".button3 { background-color: #c4d4e3; border: 2px solid black; padding: 16px 40px; text-decoration: none; font-size: 30px; color: black; margin: 5px 2px; cursor: pointer; transform: scale(0.5); transform-origin: center; }");
-            client.println(".red-border { width: 100px; color: red; border: 3px solid red; padding: 5px; display: inline-block; }");
-            client.println(".green-border { width: 100px; color: green; border: 3px solid green; padding: 5px; display: inline-block; } </style> </head> <body>");
-            client.println("<h1>ESP8622 Web Server</h1>");
-          
-            client.println("<div class=\"container\"> <div class=\"column\"><p class=\"red-border\">gpio D0</p>");
-            if (RED_LEDState=="off") {
-              client.println("<p><button class=""button2"">Status: OFF</button></p>" \
-              "<p><a href=\"/D0/on\"><button class=\"button3\">ON</button></a></p></div>");
-            } else {
-              client.println("<p><button class=""button"">Status: ON</button></p>" \
-              "<p><a href=\"/D0/off\"><button class=\"button3\">OFF</button></a></p></div>");
-            } 
-               
-            client.println("<div class=\"column\"> <p class=\"green-border\">gpio D1</p>");
-            if (GREEN_LEDState=="off") {
-              client.println("<p><button class=""button2"">Status: OFF</button></p>" \
-              "<p><a href=\"/D1/on\"><button class=\"button3\">ON</button></a></p></div>");
-            } else {
-              client.println("<p><button class=""button"">Status: ON</button></p>" \
-              "<p><a href=\"/D1/off\"><button class=\"button3\">OFF</button></a></p></div>");
-            }
-            client.println("</div></body></html>");
-            
-            client.println();       // The HTTP response ends with another blank line
-            break;
-          } else {                  // if you got a newline, then clear currentLine
-            currentLine = "";
-          }
-        } else if (c != '\r') {  // if you got anything else but a carriage return character,
-          currentLine += c;      // add it to the end of the currentLine
-        }
-      }
+	// Route to toggle red LED
+	server.on("/toggleRedLED", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (redLEDState == "off") {
+      digitalWrite(RED_LED, HIGH);
+      redLEDState = "on";
+    } else {
+      digitalWrite(RED_LED, LOW);
+      redLEDState = "off";
     }
-    header = "";
-    client.stop();
-    Serial.println("Client disconnected.");
-    Serial.println("");
-  }
+    request->send(200, "text/plain", redLEDState); // Return new state
+    });
+
+	// Route to toggle green LED
+	server.on("/toggleGreenLED", HTTP_GET, [](AsyncWebServerRequest *request) {
+			if (greenLEDState == "off") {
+        digitalWrite(GREEN_LED, HIGH);
+        greenLEDState = "on";
+			} else {
+        digitalWrite(GREEN_LED, LOW);
+        greenLEDState = "off";
+			}
+			request->send(200, "text/plain", greenLEDState); // Return new state
+			});
+
+	// Endpoint to get red LED status
+	server.on("/redLedStatus", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", redLEDState);
+    });
+
+	// Endpoint to get green LED status
+	server.on("/greenLedStatus", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", greenLEDState);
+    });
+
+	server.begin();
 }
+
+void loop() {}

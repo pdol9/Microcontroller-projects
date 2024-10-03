@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP8266 Web Server</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>ESP8266 Web Server</h1>
+  <div class="container">
+    <!-- Red LED Toggle Button -->
+    <div class="column">
+      <p><button id="toggleRedButton" class="button2" onclick="toggleRedLED()">Loading...</button></p>
+    </div>
+    <!-- Green LED Toggle Button -->
+    <div class="column">
+      <p><button id="toggleGreenButton" class="button2" onclick="toggleGreenLED()">Loading...</button></p>
+    </div>
+  </div>
+
+  <script>
+    // Function to toggle red LED
+    function toggleRedLED() {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          updateRedButton(this.responseText); // Update the red button label
+        }
+      };
+      xhttp.open("GET", "/toggleRedLED", true);
+      xhttp.send();
+    }
+
+    // Function to toggle green LED
+    function toggleGreenLED() {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          updateGreenButton(this.responseText); // Update the green button label
+        }
+      };
+      xhttp.open("GET", "/toggleGreenLED", true);
+      xhttp.send();
+    }
+
+    // Update red button label based on the state
+    function updateRedButton(state) {
+      var button = document.getElementById("toggleRedButton");
+      if (state == "on") {
+        button.innerHTML = "Toggle Red Button OFF";
+        button.className = "button"; // Set active button style
+      } else {
+        button.innerHTML = "Toggle Red Button ON";
+        button.className = "button2"; // Set inactive button style
+      }
+    }
+
+    // Update green button label based on the state
+    function updateGreenButton(state) {
+      var button = document.getElementById("toggleGreenButton");
+      if (state == "on") {
+        button.innerHTML = "Toggle Green Button OFF";
+        button.className = "button"; // Set active button style
+      } else {
+        button.innerHTML = "Toggle Green Button ON";
+        button.className = "button2"; // Set inactive button style
+      }
+    }
+
+    // Periodically update the red and green LED button states
+    setInterval(function () {
+      var xhttpRed = new XMLHttpRequest();
+      xhttpRed.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          updateRedButton(this.responseText); // Update red LED button state
+        }
+      };
+      xhttpRed.open("GET", "/redLedStatus", true);
+      xhttpRed.send();
+
+      var xhttpGreen = new XMLHttpRequest();
+      xhttpGreen.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          updateGreenButton(this.responseText); // Update green LED button state
+        }
+      };
+      xhttpGreen.open("GET", "/greenLedStatus", true);
+      xhttpGreen.send();
+    }, 10000); // Update every 10 seconds
+  </script>
+</body>
+</html>
