@@ -14,16 +14,6 @@ String greenLEDState = "off";
 const int RED_LED = D0;
 const int GREEN_LED = D1;
 
-String processor(const String& var) {
-
-	if (var == "redLEDState") {
-		return redLEDState;
-	} else if (var == "greenLEDState") {
-		return greenLEDState;
-	}
-	return String();
-}
-
 void setup() {
 
 	pinMode(RED_LED, OUTPUT);
@@ -48,16 +38,18 @@ void setup() {
 	Serial.print(". IP address: ");
 	Serial.println(WiFi.localIP());
 
-	// Route the main HTML page
-	server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(LittleFS, "/index.html", String(), false, processor);
-    });
-	server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(LittleFS, "/style.css", "text/css");
-    });
+  // Serve the main HTML page
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/index.html", "text/html");
+  });
 
-	// Route to toggle red LED
-	server.on("/toggleRedLED", HTTP_GET, [](AsyncWebServerRequest *request) {
+  // Serve the CSS file
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/style.css", "text/css");
+  });
+
+  // Endpoint to toggle Red LED
+  server.on("/toggleRedLED", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (redLEDState == "off") {
       digitalWrite(RED_LED, HIGH);
       redLEDState = "on";
@@ -65,32 +57,22 @@ void setup() {
       digitalWrite(RED_LED, LOW);
       redLEDState = "off";
     }
-    request->send(200, "text/plain", redLEDState); // Return new state
-    });
-
-	// Route to toggle green LED
-	server.on("/toggleGreenLED", HTTP_GET, [](AsyncWebServerRequest *request) {
-			if (greenLEDState == "off") {
-        digitalWrite(GREEN_LED, HIGH);
-        greenLEDState = "on";
-			} else {
-        digitalWrite(GREEN_LED, LOW);
-        greenLEDState = "off";
-			}
-			request->send(200, "text/plain", greenLEDState); // Return new state
-			});
-
-	// Endpoint to get red LED status
-	server.on("/redLedStatus", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "text/plain", redLEDState);
-    });
+  });
 
-	// Endpoint to get green LED status
-	server.on("/greenLedStatus", HTTP_GET, [](AsyncWebServerRequest *request) {
+  // Endpoint to toggle Green LED
+  server.on("/toggleGreenLED", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (greenLEDState == "off") {
+      digitalWrite(GREEN_LED, HIGH);
+      greenLEDState = "on";
+    } else {
+      digitalWrite(GREEN_LED, LOW);
+      greenLEDState = "off";
+    }
     request->send(200, "text/plain", greenLEDState);
-    });
+  });
 
-	server.begin();
+  server.begin();
 }
 
 void loop() {}
