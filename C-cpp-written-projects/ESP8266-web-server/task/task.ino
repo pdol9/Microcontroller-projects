@@ -14,8 +14,8 @@
 #define NUM_PIXELS   64
 #define DELAY_INTERVAL 250
 
-const char *ssid = "*****";
-const char *password = "*****";
+// const char *ssid = "*****";
+// const char *password = "*****";
 
 AsyncWebServer server(80);
 
@@ -26,8 +26,10 @@ String redLEDState = "off";
 String greenLEDState = "off";
 
 // Assign output variables to GPIO pins
-const int RED_LED = D0;
-const int GREEN_LED = D1;
+const uint16_t RED_LED = D0;
+const uint16_t GREEN_LED = D1;
+
+const uint8_t rainbow_palette[8][3] = {{238, 130, 238},{75, 0, 130},{0, 0, 255},{0, 255, 0},{255, 255, 0},{255, 127, 0},{255, 0 , 0},{1, 1, 1}};
 
 void setup() {
 
@@ -91,27 +93,9 @@ void setup() {
 }
 
 void loop() {
-
-  WS2812B.clear();
-
-  // turn pixels to green one by one with delay between each pixel
-  for (int pixel = 0; pixel < NUM_PIXELS; ++pixel) {
-    WS2812B.setPixelColor(pixel, WS2812B.Color(0, 255, 0));
-    WS2812B.show();
-    delay(DELAY_INTERVAL);
-  }
-  delay(1000);
-  // turn on all pixels to pink at the same time
-  for (int pixel = 0; pixel < NUM_PIXELS; ++pixel) {
-    WS2812B.setPixelColor(pixel, WS2812B.Color(255, 0, 255));
-  }
-  WS2812B.show();
-  delay(1000);
-  // count down by turning pixels to blue
-  for (int pixel = NUM_PIXELS - 1; pixel >= 0; --pixel) {
-    WS2812B.setPixelColor(pixel, WS2812B.Color(0, 0, 255));
-    WS2812B.show();
-    delay(DELAY_INTERVAL);
-  }
-  delay(2000);
+	// rainbow();
+	// seq_1();
+	// seq_2();
+	// seq_3();
+	seq_4();
 }
