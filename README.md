@@ -33,8 +33,13 @@ photoresistors so it can rotate and scan in all directions.
 
 ### Remote control of LED-matrix via webserver/ESP8266 
 
-First part: Create and host a webpage on ESP8266 which enables to turn on / off
-LEDs with provided browser's interface.
+A webpage being hosted on ESP8266 which enables to run via browser several color sequences on
+LED Matrix WS2812B-64.
 
-Second part: write few color sequences to run on LED matrix using browser's
-interface.
+
+### TODO
+
+ESP8266 webserver:
+- add interrupt function / button, with red-green LED indication
+- add button to change webpage light/dark theme (e.g. background)
+- optimise code and polish color sequences
