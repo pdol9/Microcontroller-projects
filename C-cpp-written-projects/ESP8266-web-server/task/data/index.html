@@ -1,107 +1,160 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ESP8266 Web Server</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-  <h1>ESP8266 Web Server</h1>
-  <div class="container">
-    <!-- LED Toggle Button -->
-    <div class="column">
-      <p><button id="toggleRedButton" class="button2" onclick="toggleRedLED()">Let's go!</button></p>
-    </div>
-    <div class="column">
-      <p><button id="toggleGreenButton" class="button2" onclick="toggleGreenLED()">Let's go!</button></p>
-    </div>
-  </div>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>ESP8266 Web Server</title>
+		<link rel="stylesheet" href="/style.css">
+	</head>
+	<body>
+		<h1>ESP8266 Web Server</h1>
 
-  <script>
-    // Current states
-    let redState = "off";
-    let greenState = "off";
+		<!-- LED Toggle Buttons -->
+		<div class="container">
+			<div class="column">
+				<p><button id="toggleRedButton" class="button2" onclick="toggleRedLED()">Let's go!</button></p>
+			</div>
+			<div class="column">
+				<p><button id="toggleGreenButton" class="button2" onclick="toggleGreenLED()">Let's go!</button></p>
+			</div>
+		</div>
 
-    // Function to toggle Red LED
-    function toggleRedLED() {
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          redState = this.responseText;
-          updateRedButton(redState);
-        }
-      };
-      xhttp.open("GET", "/toggleRedLED", true);
-      xhttp.send();
-    }
+		<!-- Section for Pattern Selection Dropdown -->
+		<h2>Select LED Matrix Pattern</h2>
+		<div class="dropdown-container">
+			<select id="patternDropdown" class="dropdown" onchange="setPattern(this.value)">
+				<option value="" disabled selected>Select a pattern</option>
+				<option value="avalanche">Avalanche</option>
+				<option value="rainbow_avalanche">Rainbow Avalanche</option>
+				<option value="stacking_colors">Stacking Colors</option>
+				<option value="stacking_rainbow">Stacking Rainbow</option>
+				<option value="draw_rainbow">Draw Rainbow</option>
+				<option value="slow_drift">Slow Drift</option>
+				<option value="color_palette">Color Palette</option>
+				<option value="switching_rgb">Switching RGB</option>
+				<option value="tracer">Tracer</option>
+			</select>
+			<span class="dropdown-arrow"></span>
+		</div>
 
-    // Function to toggle Green LED
-    function toggleGreenLED() {
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          greenState = this.responseText;
-          updateGreenButton(greenState);
-        }
-      };
-      xhttp.open("GET", "/toggleGreenLED", true);
-      xhttp.send();
-    }
+		<div id="loading" class="loading-spinner" style="display: none;"></div>
 
-    // Update Red Button Label and Style
-    function updateRedButton(state) {
-      var button = document.getElementById("toggleRedButton");
-      if (state === "on") {
-        button.innerHTML = "Toggle LED OFF";
-        button.className = "button active-red"; // Active style
-      } else {
-        button.innerHTML = "Toggle LED ON";
-        button.className = "button2 inactive-red"; // Inactive style
-      }
-    }
+		<script>
+			let redState = "off";
+			let greenState = "off";
 
-    // Update Green Button Label and Style
-    function updateGreenButton(state) {
-      var button = document.getElementById("toggleGreenButton");
-      if (state === "on") {
-        button.innerHTML = "Toggle LED OFF";
-        button.className = "button active-green"; // Active style
-      } else {
-        button.innerHTML = "Toggle LED ON";
-        button.className = "button2 inactive-green"; // Inactive style
-      }
-    }
+			function toggleRedLED() {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						redState = this.responseText;
+						updateRedButton(redState);
+					}
+				};
+				xhttp.open("GET", "/toggleRedLED", true);
+				xhttp.send();
+			}
 
-    // Function to fetch the current states of LEDs
-    function fetchLEDStates() {
-      // Fetch Red LED status
-      var xhttpRed = new XMLHttpRequest();
-      xhttpRed.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          redState = this.responseText;
-          updateRedButton(redState);
-        }
-      };
-      xhttpRed.open("GET", "/redLedStatus", true);
-      xhttpRed.send();
+			function toggleGreenLED() {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						greenState = this.responseText;
+						updateGreenButton(greenState);
+					}
+				};
+				xhttp.open("GET", "/toggleGreenLED", true);
+				xhttp.send();
+			}
 
-      // Fetch Green LED status
-      var xhttpGreen = new XMLHttpRequest();
-      xhttpGreen.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          greenState = this.responseText;
-          updateGreenButton(greenState);
-        }
-      };
-      xhttpGreen.open("GET", "/greenLedStatus", true);
-      xhttpGreen.send();
-    }
+			function updateRedButton(state) {
+				var button = document.getElementById("toggleRedButton");
+				if (state === "on") {
+					button.innerHTML = "Toggle LED OFF";
+					button.className = "button active-red";
+				} else {
+					button.innerHTML = "Toggle LED ON";
+					button.className = "button2 inactive-red";
+				}
+			}
 
-    // Fetch LED states every 10 seconds
-    setInterval(fetchLEDStates, 10000);
+			function updateGreenButton(state) {
+				var button = document.getElementById("toggleGreenButton");
+				if (state === "on") {
+					button.innerHTML = "Toggle LED OFF";
+					button.className = "button active-green";
+				} else {
+					button.innerHTML = "Toggle LED ON";
+					button.className = "button2 inactive-green";
+				}
+			}
 
-    // Initial fetch when the page loads
-    window.onload = fetchLEDStates;
-  </script>
-</body>
+			function fetchLEDStates() {
+				var xhttpRed = new XMLHttpRequest();
+				xhttpRed.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						redState = this.responseText;
+						updateRedButton(redState);
+					}
+				};
+				xhttpRed.open("GET", "/redLedStatus", true);
+				xhttpRed.send();
+
+				var xhttpGreen = new XMLHttpRequest();
+				xhttpGreen.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						greenState = this.responseText;
+						updateGreenButton(greenState);
+					}
+				};
+				xhttpGreen.open("GET", "/greenLedStatus", true);
+				xhttpGreen.send();
+			}
+
+			setInterval(fetchLEDStates, 10000);
+			window.onload = fetchLEDStates;
+
+			// Function to Set LED Matrix Pattern
+			function setPattern(pattern) {
+				if (pattern === "") return; // Do nothing if no pattern is selected
+				document.getElementById("loading").style.display = "block"; // Show spinner
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4) {
+						document.getElementById("loading").style.display = "none"; // Hide spinner
+						if (this.status == 200) {
+							highlightActivePattern(pattern);
+							console.log(this.responseText);
+						} else {
+							alert("Failed to set pattern. Please try again.");
+						}
+					}
+				};
+				xhttp.open("GET", "/setPattern?pattern=" + pattern, true);
+				xhttp.send();
+			}
+
+			// Function to Highlight the Active Pattern in Dropdown
+			function highlightActivePattern(activePattern) {
+				var dropdown = document.getElementById("patternDropdown");
+				dropdown.value = activePattern;
+			}
+
+			// Fetch Current Pattern on Page Load
+			function fetchCurrentPattern() {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						highlightActivePattern(this.responseText);
+					}
+				};
+				xhttp.open("GET", "/getCurrentPattern", true);
+				xhttp.send();
+			}
+
+			window.onload = function() {
+				fetchLEDStates();
+				fetchCurrentPattern();
+			};
+		</script>
+	</body>
 </html>
