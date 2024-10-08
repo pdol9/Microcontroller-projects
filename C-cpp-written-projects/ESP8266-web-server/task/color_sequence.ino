@@ -27,7 +27,7 @@ void blitz() {
 	}
 }
 
-void rainbow_avalanche() {
+void a_rainbow_avalanche() {
 	static uint8_t palette_index = 0;
 	static unsigned long pixelMillis = 0;
 	static unsigned long colorMillis = 0;
@@ -63,7 +63,7 @@ void rainbow_avalanche() {
 }
 
 // TODO non-blocking behaviour
-void stacking_colors() {
+void pallete() {
 	WS2812B.clear();
 
 	for (uint16_t i = 0; i < 8; ++i) {
@@ -82,7 +82,7 @@ void stacking_colors() {
 }
 
 // TODO non-blocking behaviour
-void stacking_rainbow() {
+void rainbow() {
 	WS2812B.clear();
 	for (uint16_t stacked = 0; stacked < NUM_PIXELS; ++stacked) {
 		for (uint16_t i = 0; i < 8; ++i, ++stacked) {
@@ -101,7 +101,7 @@ void stacking_rainbow() {
 }
 
 // TODO non-blocking behaviour
-void draw_rainbow() {
+void get_rainbow() {
 	WS2812B.clear();
 	for (uint16_t pixel = 0; pixel < 8; ++pixel) {
 		for (uint16_t i = 0; i < 8; ++i) {
@@ -113,7 +113,7 @@ void draw_rainbow() {
 	delay(2000);
 }
 
-void slow_drift() {
+void drift() {
 
 	WS2812B.clear();
 	unsigned long currentMillis = millis();
@@ -158,7 +158,7 @@ void test_one() {
 	}
 }
 
-void test_two() {
+void filler() {
 
 	WS2812B.clear();
 	unsigned long currentMillis = millis();

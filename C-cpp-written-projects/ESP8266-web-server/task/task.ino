@@ -31,10 +31,8 @@ volatile bool abort_sequence = false;
 unsigned long one_sec_interval = 1000;
 unsigned long previousMillis = 0;
 
-// store the current output state
-String redLEDState = "off";
-String greenLEDState = "off";
-String currentPattern = "rainbow";
+// store the current sequence
+String currentPattern = "Default";
 
 // Assign output constants to GPIO pins
 const uint8_t RED_LED = D0;
@@ -54,7 +52,7 @@ void setup() {
 	pinMode(RED_LED, OUTPUT);
 	pinMode(GREEN_LED, OUTPUT);
 	digitalWrite(RED_LED, LOW);
-	digitalWrite(GREEN_LED, LOW);  
+	digitalWrite(GREEN_LED, HIGH);  
 
 	Serial.begin(115200);
 	pinMode(INTERRUPT_BUTTON, INPUT_PULLUP);
@@ -85,28 +83,18 @@ void setup() {
 			request->send(LittleFS, "/style.css", "text/css");
 			});
 
-	// Endpoint to toggle Red LED
-	server.on("/toggleRedLED", HTTP_GET, [](AsyncWebServerRequest *request) {
-			if (redLEDState == "off") {
-			digitalWrite(RED_LED, HIGH);
-			redLEDState = "on";
-			} else {
-			digitalWrite(RED_LED, LOW);
-			redLEDState = "off";
-			}
-			request->send(200, "text/plain", redLEDState);
+	// Endpoint to stop the current LED sequence
+	server.on("/abort_sequence", HTTP_GET, [](AsyncWebServerRequest *request) {
+			abort_sequence = true;
+			request->send(200, "text/plain", "Sequence Stopped");
 			});
 
-	// Endpoint to toggle Green LED
-	server.on("/toggleGreenLED", HTTP_GET, [](AsyncWebServerRequest *request) {
-			if (greenLEDState == "off") {
-			digitalWrite(GREEN_LED, HIGH);
-			greenLEDState = "on";
-			} else {
-			digitalWrite(GREEN_LED, LOW);
-			greenLEDState = "off";
-			}
-			request->send(200, "text/plain", greenLEDState);
+	// Endpoint to toggle background between light and dark mode
+	server.on("/toggle_background", HTTP_GET, [](AsyncWebServerRequest *request) {
+			static bool darkMode = false;
+			darkMode = !darkMode;
+			String mode = darkMode ? "dark" : "light";
+			request->send(200, "text/plain", mode);
 			});
 
 	// Endpoint to Get Current Pattern
@@ -117,9 +105,9 @@ void setup() {
 	server.on("/setPattern", HTTP_GET, [](AsyncWebServerRequest *request) {
 			if (request->hasParam("pattern")) {
 			String pattern = request->getParam("pattern")->value();
-			if (pattern == "blitz" || pattern == "rainbow_avalanche" ||
-					pattern == "stacking_colors" || pattern == "stacking_rainbow" ||
-					pattern == "draw_rainbow" || pattern == "slow_drift" ||
+			if (pattern == "blitz" || pattern == "a_rainbow_avalanche" ||
+					pattern == "pelette" || pattern == "rainbow" ||
+					pattern == "get_rainbow" || pattern == "drift" ||
 					pattern == "color_palette" || pattern == "switching_rgb" ||
 					pattern == "tracer") {
 			currentPattern = pattern;
@@ -137,54 +125,31 @@ void setup() {
 	WS2812B.begin();
 }
 
-// int one = 1;
 
 void loop() {
-	// if (one == 1)
-	//   test_one();
-	// else
-	//   rainbow_avalanche();
-	// test_two();
-
-	if (currentPattern == "blitz") {
-		blitz();
-	}
-	else if (currentPattern == "rainbow_avalanche") {
-		rainbow_avalanche();
-	}
-	// else if (currentPattern == "stacking_colors") {
-	// 	stacking_colors();
-	// }
-	// else if (currentPattern == "stacking_rainbow") {
-	// 	stacking_rainbow();
-	// }
-	// else if (currentPattern == "draw_rainbow") {
-	// 	draw_rainbow();
-	// }
-	else if (currentPattern == "slow_drift") {
-		slow_drift();
-	}
-	else if (currentPattern == "color_palette") {
-		color_palette();
-	}
-	else if (currentPattern == "switching_rgb") {
-		switching_rgb();
-	}
-	else if (currentPattern == "tracer") {
-		tracer();
+	switch (currentPattern[0]) {
+		case 'b': blitz(); break;
+		case 'a': a_rainbow_avalanche(); break;
+		case 'p': pallete(); break;
+		case 'r': rainbow(); break;
+		case 'g': get_rainbow(); break;
+		case 'd': drift(); break;
+		case 'c': color_palette(); break;
+		case 's': switching_rgb(); break;
+		case 't': tracer(); break;
+		default: filler(); break;
 	}
 	interrupt_led();
 }
 
 void  interrupt_led() {
 	if (abort_sequence == true) {
+		digitalWrite(GREEN_LED, LOW);
 		digitalWrite(RED_LED, HIGH);
 		abort_sequence = false;
-		delay(1000);
+		currentPattern = "Default";
+		delay(1500);
 		digitalWrite(RED_LED, LOW);
-		//     if (one == 1)
-		//       one = 0;
-		//     else
-		//       one = 1;
+		digitalWrite(GREEN_LED, HIGH);
 	}
 }

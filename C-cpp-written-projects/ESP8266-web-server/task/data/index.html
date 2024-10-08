@@ -8,14 +8,12 @@
 	<body>
 		<h1>ESP8266 Web Server</h1>
 
-		// TODO
-		<!-- WIP: new functionalities: stop sequence in progress and change webpage background -->
 		<div class="container">
 			<div class="column">
-				<p><button id="toggleRedButton" class="button2" onclick="toggleRedLED()">Stop the Sequence</button></p>
+				<p><button id="abort_sequence" class="button2" onclick="abort_sequence()">Stop the Sequence</button></p>
 			</div>
 			<div class="column">
-				<p><button id="toggleGreenButton" class="button2" onclick="toggleGreenLED()">Change Background</button></p>
+				<p><button id="change_background" class="button2" onclick="change_background()">Change Background</button></p>
 			</div>
 		</div>
 
@@ -25,13 +23,13 @@
 			<select id="patternDropdown" class="dropdown" onchange="setPattern(this.value)">
 				<option value="" disabled selected>Select a pattern</option>
 				<option value="blitz">Blitz</option>
-				<option value="rainbow_avalanche">Rainbow Avalanche</option>
-				<!--
-					<option value="stacking_colors">Stacking Colors</option>
-					<option value="stacking_rainbow">Stacking Rainbow</option>
-					<option value="draw_rainbow">Draw Rainbow</option>
+				<option value="a_rainbow_avalanche">Rainbow Avalanche</option>
+				<option value="drift">Drift</option>
+				<!-- WIP
+					<option value="palette">Palette</option>
+					<option value="rainbow">Rainbow</option>
+					<option value="get_rainbow">Get Rainbow</option>
 				-->
-				<option value="slow_drift">Slow Drift</option>
 				<option value="color_palette">Color Palette</option>
 				<option value="switching_rgb">Switching RGB</option>
 				<option value="tracer">Tracer</option>
@@ -42,79 +40,55 @@
 		<div id="loading" class="loading-spinner" style="display: none;"></div>
 
 		<script>
-			let redState = "off";
-			let greenState = "off";
-
-			function toggleRedLED() {
+			// Abort the running sequence
+			function abort_sequence() {
 				var xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						redState = this.responseText;
-						updateRedButton(redState);
+						console.log(this.responseText);  // Sequence Stopped
 					}
 				};
-				xhttp.open("GET", "/toggleRedLED", true);
+				xhttp.open("GET", "/abort_sequence", true);  // Updated endpoint
 				xhttp.send();
 			}
 
-			function toggleGreenLED() {
+			// Change the background between light and dark mode
+			function change_background() {
 				var xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						greenState = this.responseText;
-						updateGreenButton(greenState);
+						var mode = this.responseText;
+						updateBackgroundButton(mode); // Update button text
+						toggleBackground(mode);  // Toggle background color
 					}
 				};
-				xhttp.open("GET", "/toggleGreenLED", true);
+				xhttp.open("GET", "/toggle_background", true);  // Updated endpoint
 				xhttp.send();
 			}
 
-			function updateRedButton(state) {
-				var button = document.getElementById("toggleRedButton");
-				if (state === "on") {
-					button.innerHTML = "Toggle LED OFF";
-					button.className = "button active-red";
+			function toggleBackground(mode) {
+				var body = document.body;
+
+				if (mode === "dark") {
+					body.classList.remove("light-mode");
+					body.classList.add("dark-mode");
 				} else {
-					button.innerHTML = "Toggle LED ON";
-					button.className = "button2 inactive-red";
+					body.classList.remove("dark-mode");
+					body.classList.add("light-mode");
 				}
 			}
 
-			function updateGreenButton(state) {
-				var button = document.getElementById("toggleGreenButton");
-				if (state === "on") {
-					button.innerHTML = "Toggle LED OFF";
-					button.className = "button active-green";
+			// Update button text for background mode
+			function updateBackgroundButton(state) {
+				var button = document.getElementById("change_background");
+				if (state === "dark") {
+					button.innerHTML = "Switch to Light Mode";
+					button.className = "button active-dark";
 				} else {
-					button.innerHTML = "Toggle LED ON";
-					button.className = "button2 inactive-green";
+					button.innerHTML = "Switch to Dark Mode";
+					button.className = "button2 inactive-light";
 				}
 			}
-
-			function fetchLEDStates() {
-				var xhttpRed = new XMLHttpRequest();
-				xhttpRed.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						redState = this.responseText;
-						updateRedButton(redState);
-					}
-				};
-				xhttpRed.open("GET", "/redLedStatus", true);
-				xhttpRed.send();
-
-				var xhttpGreen = new XMLHttpRequest();
-				xhttpGreen.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						greenState = this.responseText;
-						updateGreenButton(greenState);
-					}
-				};
-				xhttpGreen.open("GET", "/greenLedStatus", true);
-				xhttpGreen.send();
-			}
-
-			setInterval(fetchLEDStates, 10000);
-			window.onload = fetchLEDStates;
 
 			// Function to Set LED Matrix Pattern
 			function setPattern(pattern) {
@@ -155,7 +129,6 @@
 			}
 
 			window.onload = function() {
-				fetchLEDStates();
 				fetchCurrentPattern();
 			};
 		</script>

@@ -1,57 +1,71 @@
-html {
-	font-family: bold Helvetica, Arial, sans-serif;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	margin: 0;
-	height: 100vh;
-	justify-content: center;
-	text-align: center;
-	background: linear-gradient(to right, #8B0000, #FF6347, #FFD700, #ADFF2F, #32CD32, #7FFF00, #98FB98);
-	/* Gradient from dark red to light green with intermediate colors */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
+/* Flex container to align content in the center */
 body {
-	width: 100%;
-	height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding-top: 40px;
+  transition: background 0.5s ease, color 0.5s ease;
 }
 
+/* Default light mode gradient background */
+html {
+  font-family: bold Helvetica, Arial, sans-serif;
+  background: linear-gradient(to right, #8B0000, #FF6347, #FFD700, #ADFF2F, #32CD32, #7FFF00, #98FB98);
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Light mode background (warm gradient) */
+.light-mode {
+  background: linear-gradient(to right, #FFD700, #FFB347, #FF6347, #FF4500, #FF8C00);
+  color: rgba(0, 0, 0, 0.85);
+}
+
+/* Dark mode background (darker green gradient) */
+.dark-mode {
+  background: linear-gradient(to right, #2E8B57, #006400, #228B22, #556B2F, #2F4F4F);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Remove extra margin in header */
 h1 {
-	margin-top: 0;
-	color: #333;
+  margin-top: 0;
+  color: #333;
 }
 
-/* Container for the buttons */
+/* Flexbox container for buttons */
 .container {
-	display: flex;
-	justify-content: center;
-	gap: 40px;
-	margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 20px;
 }
 
-/* Each button column */
-.column {
-	flex: 1;
-	max-width: 200px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
+/* Button styling */
 .button,
 .button2 {
-	width: 200px;
-	border: 8px;
-	color: #7FFFD4; /* Aquamarine */
-	padding: 16px;
-	text-decoration: none;
-	font-size: 20px;
-	font-weight: bold;
-	background-color: #5F9EA0;
-	margin: 5px 2px;
-	cursor: pointer;
-	transition: background-color 0.3s ease, transform 0.2s ease;
-	border-radius: 8px; /* Rounded corners */
+  width: 200px;
+  border: 8px;
+  color: #7FFFD4; /* Aquamarine */
+  padding: 16px;
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: bold;
+  background-color: #5F9EA0;
+  margin: 5px 2px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border-radius: 8px; /* Rounded corners */
 }
 
 /* Active button styles */
