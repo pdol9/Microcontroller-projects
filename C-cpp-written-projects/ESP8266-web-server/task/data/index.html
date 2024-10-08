@@ -8,13 +8,14 @@
 	<body>
 		<h1>ESP8266 Web Server</h1>
 
-		<!-- LED Toggle Buttons -->
+		// TODO
+		<!-- WIP: new functionalities: stop sequence in progress and change webpage background -->
 		<div class="container">
 			<div class="column">
-				<p><button id="toggleRedButton" class="button2" onclick="toggleRedLED()">Let's go!</button></p>
+				<p><button id="toggleRedButton" class="button2" onclick="toggleRedLED()">Stop the Sequence</button></p>
 			</div>
 			<div class="column">
-				<p><button id="toggleGreenButton" class="button2" onclick="toggleGreenLED()">Let's go!</button></p>
+				<p><button id="toggleGreenButton" class="button2" onclick="toggleGreenLED()">Change Background</button></p>
 			</div>
 		</div>
 
@@ -23,11 +24,13 @@
 		<div class="dropdown-container">
 			<select id="patternDropdown" class="dropdown" onchange="setPattern(this.value)">
 				<option value="" disabled selected>Select a pattern</option>
-				<option value="avalanche">Avalanche</option>
+				<option value="blitz">Blitz</option>
 				<option value="rainbow_avalanche">Rainbow Avalanche</option>
-				<option value="stacking_colors">Stacking Colors</option>
-				<option value="stacking_rainbow">Stacking Rainbow</option>
-				<option value="draw_rainbow">Draw Rainbow</option>
+				<!--
+					<option value="stacking_colors">Stacking Colors</option>
+					<option value="stacking_rainbow">Stacking Rainbow</option>
+					<option value="draw_rainbow">Draw Rainbow</option>
+				-->
 				<option value="slow_drift">Slow Drift</option>
 				<option value="color_palette">Color Palette</option>
 				<option value="switching_rgb">Switching RGB</option>

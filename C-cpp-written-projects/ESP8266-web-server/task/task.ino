@@ -4,33 +4,50 @@ Added:
 - 5V Power Supply Module, 
 - LED Matrix WS2812b 8x8 connected to D2
 - 330 Ohm resistor between D2 and matrix Data-in pin
+- push button to pin D6 for interrupt
  */
 
 #include "LittleFS.h"
 #include <ESPAsyncWebServer.h>
 #include <Adafruit_NeoPixel.h>
 
-#define PIN_WS2812B  D2
-#define NUM_PIXELS   64
-#define DELAY_INTERVAL 250
+#define PIN_WS2812B     D2
+#define NUM_PIXELS      64
+#define DELAY_INTERVAL  250
 
 // const char *ssid = "*****";
 // const char *password = "*****";
 
 AsyncWebServer server(80);
-
 Adafruit_NeoPixel WS2812B(NUM_PIXELS, PIN_WS2812B, NEO_GRB + NEO_KHZ800);
+const uint8_t rainbow_palette[8][3] = {{238, 130, 238},{75, 0, 130},{0, 0, 255},{0, 255, 0},{255, 255, 0},{255, 127, 0},{255, 0 , 0},{1, 1, 1}};
+
+// Interrupt Debouncing 
+unsigned long button_time = 0;  
+unsigned long last_button_time = 0;
+volatile bool abort_sequence = false;
+
+// timing
+unsigned long one_sec_interval = 1000;
+unsigned long previousMillis = 0;
 
 // store the current output state
 String redLEDState = "off";
 String greenLEDState = "off";
 String currentPattern = "rainbow";
 
-// Assign output variables to GPIO pins
-const uint16_t RED_LED = D0;
-const uint16_t GREEN_LED = D1;
+// Assign output constants to GPIO pins
+const uint8_t RED_LED = D0;
+const uint8_t GREEN_LED = D1;
+const uint8_t INTERRUPT_BUTTON = D6;
 
-const uint8_t rainbow_palette[8][3] = {{238, 130, 238},{75, 0, 130},{0, 0, 255},{0, 255, 0},{255, 255, 0},{255, 127, 0},{255, 0 , 0},{1, 1, 1}};
+void ICACHE_RAM_ATTR isr() {
+	button_time = millis();
+	if (button_time - last_button_time > 250) {
+		abort_sequence = true;
+		last_button_time = button_time;
+	}
+}
 
 void setup() {
 
@@ -40,6 +57,8 @@ void setup() {
 	digitalWrite(GREEN_LED, LOW);  
 
 	Serial.begin(115200);
+	pinMode(INTERRUPT_BUTTON, INPUT_PULLUP);
+	attachInterrupt(INTERRUPT_BUTTON, isr, FALLING);
 	if (!LittleFS.begin()) {
 		Serial.println("Failed to mount file system");
 		return;
@@ -98,7 +117,7 @@ void setup() {
 	server.on("/setPattern", HTTP_GET, [](AsyncWebServerRequest *request) {
 			if (request->hasParam("pattern")) {
 			String pattern = request->getParam("pattern")->value();
-			if (pattern == "avalanche" || pattern == "rainbow_avalanche" ||
+			if (pattern == "blitz" || pattern == "rainbow_avalanche" ||
 					pattern == "stacking_colors" || pattern == "stacking_rainbow" ||
 					pattern == "draw_rainbow" || pattern == "slow_drift" ||
 					pattern == "color_palette" || pattern == "switching_rgb" ||
@@ -113,26 +132,35 @@ void setup() {
 			request->send(400, "text/plain", "Bad Request");
 			}
 			});
+
 	server.begin();
 	WS2812B.begin();
 }
 
+// int one = 1;
+
 void loop() {
-	if (currentPattern == "avalanche") {
-		avalanche();
+	// if (one == 1)
+	//   test_one();
+	// else
+	//   rainbow_avalanche();
+	// test_two();
+
+	if (currentPattern == "blitz") {
+		blitz();
 	}
 	else if (currentPattern == "rainbow_avalanche") {
 		rainbow_avalanche();
 	}
-	else if (currentPattern == "stacking_colors") {
-		stacking_colors();
-	}
-	else if (currentPattern == "stacking_rainbow") {
-		stacking_rainbow();
-	}
-	else if (currentPattern == "draw_rainbow") {
-		draw_rainbow();
-	}
+	// else if (currentPattern == "stacking_colors") {
+	// 	stacking_colors();
+	// }
+	// else if (currentPattern == "stacking_rainbow") {
+	// 	stacking_rainbow();
+	// }
+	// else if (currentPattern == "draw_rainbow") {
+	// 	draw_rainbow();
+	// }
 	else if (currentPattern == "slow_drift") {
 		slow_drift();
 	}
@@ -144,5 +172,19 @@ void loop() {
 	}
 	else if (currentPattern == "tracer") {
 		tracer();
+	}
+	interrupt_led();
+}
+
+void  interrupt_led() {
+	if (abort_sequence == true) {
+		digitalWrite(RED_LED, HIGH);
+		abort_sequence = false;
+		delay(1000);
+		digitalWrite(RED_LED, LOW);
+		//     if (one == 1)
+		//       one = 0;
+		//     else
+		//       one = 1;
 	}
 }
