@@ -218,6 +218,10 @@ h2 {
 	background-color: #FF5722; /* Orange background for active pattern */
 }
 
+select option:disabled[selected] {
+  color: black;
+}
+
 /* Responsive Design for Dropdown */
 @media (max-width: 600px) {
 	.dropdown-container {
@@ -227,6 +231,7 @@ h2 {
 	.dropdown {
 		font-size: 16px;
 		padding: 14px;
+		color: black;
 	}
 
 	.dropdown-arrow {

@@ -10,7 +10,7 @@ The color sequences are programmed in a way which makes possible to interrupt th
 during their execution, either by using a physical (push) button or web interface.
 
 During sequence interrupt a green led will turn off and red will turn on for a
-brief moment (1,5 s).
+brief moment (1 s).
 
 ## Hardware setup
 
@@ -24,17 +24,12 @@ brief moment (1,5 s).
 
 ##  Installation
 
-At the moment code is only possible to compile and upload with Arduino IDE.
+- Replace value of ```*ssid``` with a valid name of the WiFi and same
+with ```*password``` before compiling code.
+- Build filesystem image and upload it with code to the MCU.
+- use local IP address given from the Serial monitor.
 
-There are several steps to do to access the website:
-- Upload files in ```data``` directory using LittleFS library.
-- Replace value of ```*ssid``` with a valid name of the WiFi and same with
-value of ```*password```.
-- Upload the code to the ESP8266.
-- Open Serial monitor in Arduino IDE and enter local IP address given in the
-Serial monitor into the browser.
-
-### Color sequences (Description)
+### Listed Color sequences
 ```WIP```
 
 ### TODO
