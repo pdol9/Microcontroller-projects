@@ -2,8 +2,6 @@
 
 // const char *ssid = "*****";
 // const char *password = "*****";
-const char *ssid = "Fritz-WOB";
-const char *password = "Up&Down-Around153W00ds";
 
 AsyncWebServer server(80);
 Adafruit_NeoPixel WS2812B(NUM_PIXELS, PIN_WS2812B, NEO_GRB + NEO_KHZ800);

@@ -18,15 +18,11 @@ void		rainbow_avalanche();
 void		filler();
 uint32_t	Wheel(byte WheelPos);
 
-
 // main structs
 extern AsyncWebServer server;
 extern Adafruit_NeoPixel WS2812B;
-extern const uint8_t rainbow_palette[8][3];
 
-// Interrupt Debouncing 
-extern unsigned long button_time;
-extern unsigned long last_button_time;
+extern const uint8_t rainbow_palette[8][3];
 extern volatile bool abort_sequence;
 
 // timing
